@@ -41,9 +41,9 @@
 
     <!-- Hlavní kontejner pro mřížku aplikací -->
     <main class="flex-grow container mx-auto px-4 pb-16 max-w-6xl">
-        <!-- Zde se pomocí JavaScriptu vygenerují jednotlivé karty -->
-        <div id="grid-aplikaci" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Karty se načítají dynamicky... -->
+        <!-- Zde se pomocí JavaScriptu vygenerují jednotlivé kategorie a karty -->
+        <div id="obsah-aplikaci" class="space-y-12">
+            <!-- Obsah se načítá dynamicky... -->
         </div>
     </main>
 
@@ -67,7 +67,8 @@
                 odkaz: "https://mojeeurona.web.app/", // Sem dej URL nebo název souboru
                 ikona: "sparkles",      // Název ikony z webu Lucide
                 barvaPozadiIkony: "bg-[#f8fafc]",
-                barvaIkony: "text-[#a855f7]"
+                barvaIkony: "text-[#a855f7]",
+                kategorie: "Správa domácnosti" // <-- NOVÁ VLASTNOST
             },
             {
                 nazev: "Můj Mrazák",
@@ -75,7 +76,8 @@
                 odkaz: "https://mujmrazak.web.app/",
                 ikona: "snowflake",
                 barvaPozadiIkony: "bg-[#f8fafc]",
-                barvaIkony: "text-[#2563eb]"
+                barvaIkony: "text-[#2563eb]",
+                kategorie: "Správa domácnosti"
             },
             {
                 nazev: "MyBau",
@@ -83,16 +85,18 @@
                 odkaz: "https://mybau.netlify.app/",
                 ikona: "shopping-cart",
                 barvaPozadiIkony: "bg-[#E3000F]",
-                barvaIkony: "text-[#F4F4F4]"
+                barvaIkony: "text-[#F4F4F4]",
+                kategorie: "Nákupy"
             }
             // PŘIKLAD DALŠÍ APLIKACE (smaž lomítka a uprav):
             // ,{
             //     nazev: "Moje nová aplikace",
             //     popis: "Krátký popis toho, co aplikace umí.",
-            //     odkaz: "nova_aplikace.html",
+            //     odkaz: "https://nova-aplikace.cz",
             //     ikona: "star", // hledej na lucide.dev
             //     barvaPozadiIkony: "bg-gray-200",
-            //     barvaIkony: "text-gray-700"
+            //     barvaIkony: "text-gray-700",
+            //     kategorie: "Ostatní nástroje"
             // }
         ];
 
@@ -100,44 +104,81 @@
         // 2. VYKRESLENÍ (Do tohoto kódu už nemusíš zasahovat)
         // ==========================================
         
-        const kontejner = document.getElementById('grid-aplikaci');
+        const kontejner = document.getElementById('obsah-aplikaci');
 
-        // Projdeme všechny aplikace v seznamu a vytvoříme pro ně HTML
+        // 1. Automatické řazení aplikací podle abecedy (podle názvu)
+        seznamAplikaci.sort((a, b) => a.nazev.localeCompare(b.nazev, 'cs'));
+
+        // 2. Seskupení aplikací do kategorií
+        const aplikacePodleKategorii = {};
         seznamAplikaci.forEach(app => {
-            // Vytvoříme odkaz, který bude sloužit jako celá karta
-            const karta = document.createElement('a');
-            karta.href = app.odkaz;
-            // Otevřít na nové záložce (volitelné, odkomentuj pokud chceš): 
-            // karta.target = "_blank"; 
+            const kat = app.kategorie || "Ostatní";
+            if (!aplikacePodleKategorii[kat]) {
+                aplikacePodleKategorii[kat] = [];
+            }
+            aplikacePodleKategorii[kat].push(app);
+        });
+
+        // 3. Řazení samotných kategorií podle abecedy
+        const serazeneKategorie = Object.keys(aplikacePodleKategorii).sort((a, b) => a.localeCompare(b, 'cs'));
+
+        // 4. Vykreslení kategorií a jejich aplikací
+        serazeneKategorie.forEach(kategorie => {
+            // Vytvoření sekce pro celou kategorii
+            const sekceKategorie = document.createElement('div');
             
-            // Nastavení CSS tříd pro kartu (vzhled, stíny, efekty při najetí myší)
-            karta.className = `
-                group bg-white rounded-2xl p-6 shadow-sm border border-slate-200
-                hover:shadow-md hover:border-primary/30 hover:-translate-y-1
-                transition-all duration-300 ease-in-out flex flex-col h-full
-                focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
-            `;
+            // Nadpis kategorie
+            const nadpis = document.createElement('h2');
+            nadpis.className = "text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-200 pb-2";
+            nadpis.innerHTML = `<i data-lucide="folder" class="w-6 h-6 text-primary"></i> ${kategorie}`;
+            sekceKategorie.appendChild(nadpis);
 
-            // Obsah karty
-            karta.innerHTML = `
-                <div class="flex items-start justify-between mb-4">
-                    <div class="p-3 rounded-xl ${app.barvaPozadiIkony} ${app.barvaIkony} group-hover:scale-110 transition-transform duration-300">
-                        <i data-lucide="${app.ikona}" class="w-6 h-6"></i>
-                    </div>
-                    <div class="text-slate-300 group-hover:text-primary transition-colors duration-300">
-                        <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
-                    </div>
-                </div>
-                <h2 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary transition-colors duration-300">
-                    ${app.nazev}
-                </h2>
-                <p class="text-slate-600 text-sm leading-relaxed flex-grow">
-                    ${app.popis}
-                </p>
-            `;
+            // Mřížka pro aplikace v dané kategorii
+            const mrizka = document.createElement('div');
+            mrizka.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6";
 
-            // Přidání karty do mřížky
-            kontejner.appendChild(karta);
+            // Vykreslení karet
+            aplikacePodleKategorii[kategorie].forEach(app => {
+                const karta = document.createElement('a');
+                karta.href = app.odkaz;
+                karta.target = "_blank"; // Otevře se na nové záložce
+                
+                karta.className = `
+                    group bg-white rounded-2xl p-6 shadow-sm border border-slate-200
+                    hover:shadow-md hover:border-primary/30 hover:-translate-y-1
+                    transition-all duration-300 ease-in-out flex flex-col h-full
+                    focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                `;
+
+                // Vyčištění odkazu pro zobrazení (odstraní https:// a případné lomítko na konci)
+                const zobrazenyOdkaz = app.odkaz.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+                karta.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-3 rounded-xl ${app.barvaPozadiIkony} ${app.barvaIkony} group-hover:scale-110 transition-transform duration-300 border border-slate-100">
+                            <i data-lucide="${app.ikona}" class="w-6 h-6"></i>
+                        </div>
+                        <div class="text-slate-300 group-hover:text-primary transition-colors duration-300">
+                            <i data-lucide="external-link" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary transition-colors duration-300">
+                        ${app.nazev}
+                    </h3>
+                    <p class="text-slate-600 text-sm leading-relaxed flex-grow">
+                        ${app.popis}
+                    </p>
+                    <div class="mt-5 pt-4 border-t border-slate-100 flex items-center text-slate-400 text-sm truncate group-hover:text-primary/80 transition-colors duration-300">
+                        <i data-lucide="link-2" class="w-4 h-4 mr-2 flex-shrink-0"></i>
+                        <span class="truncate">${zobrazenyOdkaz}</span>
+                    </div>
+                `;
+
+                mrizka.appendChild(karta);
+            });
+
+            sekceKategorie.appendChild(mrizka);
+            kontejner.appendChild(sekceKategorie);
         });
 
         // Automatické nastavení aktuálního roku v patičce
