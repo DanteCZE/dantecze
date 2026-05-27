@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Můj Rozcestník Aplikací</title>
+    
+    <!-- Tailwind CSS pro moderní a responzivní vzhled bez psaní vlastního CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Knihovna Lucide pro krásné a jednotné ikony -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Vlastní nastavení pro Tailwind (volitelné, pro jemné doladění barev) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f46e5', // Indigová barva
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-primary selection:text-white">
+
+    <!-- Hlavička stránky -->
+    <header class="pt-16 pb-10 text-center px-4">
+        <div class="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-4">
+            <i data-lucide="layout-grid" class="w-8 h-8 text-primary"></i>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-4">
+            Moje Aplikace
+        </h1>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+            Vítej v rozcestníku. Zde najdeš všechny mé vytvořené nástroje a aplikace přehledně na jednom místě.
+        </p>
+    </header>
+
+    <!-- Hlavní kontejner pro mřížku aplikací -->
+    <main class="flex-grow container mx-auto px-4 pb-16 max-w-6xl">
+        <!-- Zde se pomocí JavaScriptu vygenerují jednotlivé karty -->
+        <div id="grid-aplikaci" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Karty se načítají dynamicky... -->
+        </div>
+    </main>
+
+    <!-- Patička -->
+    <footer class="py-6 text-center text-slate-500 text-sm border-t border-slate-200 mt-auto">
+        <p>&copy; <span id="rok"></span> - DanteCZE</p>
+    </footer>
+
+    <!-- LOGIKA APLIKACE A DATA -->
+    <script>
+        // ==========================================
+        // 1. ZDE PŘIDÁVEJ SVÉ APLIKACE
+        // ==========================================
+        // Pro přidání nové aplikace stačí zkopírovat jeden blok v závorkách {...}
+        // Seznam všech dostupných ikon najdeš na: https://lucide.dev/icons
+        
+        const seznamAplikaci = [
+            {
+                nazev: "Moje Eurona",
+                popis: "Správce zásob a objednávek z Eurony.",
+                odkaz: "https://mojeeurona.web.app/", // Sem dej URL nebo název souboru
+                ikona: "sparkles",      // Název ikony z webu Lucide
+                barvaPozadiIkony: "bg-[#f8fafc]",
+                barvaIkony: "text-[#a855f7]"
+            },
+            {
+                nazev: "Můj Mrazák",
+                popis: "Správce zásob v mrazácích.",
+                odkaz: "https://mujmrazak.web.app/",
+                ikona: "snowflake",
+                barvaPozadiIkony: "bg-[#f8fafc]",
+                barvaIkony: "text-[#2563eb]"
+            },
+            {
+                nazev: "MyBau",
+                popis: "Nákupní seznam pro Bauhaus.",
+                odkaz: "https://mybau.netlify.app/",
+                ikona: "shopping-cart",
+                barvaPozadiIkony: "bg-[#E3000F]",
+                barvaIkony: "text-[#F4F4F4]"
+            }
+            // PŘIKLAD DALŠÍ APLIKACE (smaž lomítka a uprav):
+            // ,{
+            //     nazev: "Moje nová aplikace",
+            //     popis: "Krátký popis toho, co aplikace umí.",
+            //     odkaz: "nova_aplikace.html",
+            //     ikona: "star", // hledej na lucide.dev
+            //     barvaPozadiIkony: "bg-gray-200",
+            //     barvaIkony: "text-gray-700"
+            // }
+        ];
+
+        // ==========================================
+        // 2. VYKRESLENÍ (Do tohoto kódu už nemusíš zasahovat)
+        // ==========================================
+        
+        const kontejner = document.getElementById('grid-aplikaci');
+
+        // Projdeme všechny aplikace v seznamu a vytvoříme pro ně HTML
+        seznamAplikaci.forEach(app => {
+            // Vytvoříme odkaz, který bude sloužit jako celá karta
+            const karta = document.createElement('a');
+            karta.href = app.odkaz;
+            // Otevřít na nové záložce (volitelné, odkomentuj pokud chceš): 
+            // karta.target = "_blank"; 
+            
+            // Nastavení CSS tříd pro kartu (vzhled, stíny, efekty při najetí myší)
+            karta.className = `
+                group bg-white rounded-2xl p-6 shadow-sm border border-slate-200
+                hover:shadow-md hover:border-primary/30 hover:-translate-y-1
+                transition-all duration-300 ease-in-out flex flex-col h-full
+                focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+            `;
+
+            // Obsah karty
+            karta.innerHTML = `
+                <div class="flex items-start justify-between mb-4">
+                    <div class="p-3 rounded-xl ${app.barvaPozadiIkony} ${app.barvaIkony} group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="${app.ikona}" class="w-6 h-6"></i>
+                    </div>
+                    <div class="text-slate-300 group-hover:text-primary transition-colors duration-300">
+                        <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary transition-colors duration-300">
+                    ${app.nazev}
+                </h2>
+                <p class="text-slate-600 text-sm leading-relaxed flex-grow">
+                    ${app.popis}
+                </p>
+            `;
+
+            // Přidání karty do mřížky
+            kontejner.appendChild(karta);
+        });
+
+        // Automatické nastavení aktuálního roku v patičce
+        document.getElementById('rok').textContent = new Date().getFullYear();
+
+        // Inicializace ikon Lucide (musí se zavolat až po vygenerování HTML)
+        lucide.createIcons();
+
+    </script>
+</body>
+</html>
