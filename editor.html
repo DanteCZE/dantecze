@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor rozcestníku</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: Inter, "Segoe UI", sans-serif;
+            color: #1e293b;
+            background: #f1f5f9;
+        }
+
+        * { box-sizing: border-box; }
+
+        body { margin: 0; }
+
+        header {
+            padding: 2.5rem 1.25rem 1.5rem;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .container {
+            width: min(1100px, 100%);
+            margin: 0 auto;
+        }
+
+        h1 { margin: 0 0 .5rem; font-size: clamp(1.8rem, 4vw, 2.4rem); }
+        header p { margin: 0; color: #64748b; }
+
+        main { padding: 1.5rem 1.25rem 4rem; }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: .85rem 1rem;
+            background: #ffffffed;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px #0f172a0b;
+            backdrop-filter: blur(8px);
+        }
+
+        #status { color: #475569; font-size: .9rem; }
+        #status.error { color: #b91c1c; }
+        #status.success { color: #15803d; }
+
+        .actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+
+        button {
+            min-height: 2.6rem;
+            padding: .6rem 1rem;
+            border: 0;
+            border-radius: .65rem;
+            background: #4f46e5;
+            color: #fff;
+            font: inherit;
+            font-weight: 650;
+            cursor: pointer;
+        }
+
+        button:hover:not(:disabled) { background: #4338ca; }
+        button:disabled { opacity: .5; cursor: not-allowed; }
+        button.secondary { background: #e2e8f0; color: #1e293b; }
+        button.secondary:hover:not(:disabled) { background: #cbd5e1; }
+        button.danger { background: #fee2e2; color: #b91c1c; }
+        button.danger:hover:not(:disabled) { background: #fecaca; }
+
+        #entries { display: grid; gap: 1rem; }
+
+        .entry {
+            padding: 1.25rem;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px #0f172a08;
+        }
+
+        .entry-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .entry-header h2 { margin: 0; font-size: 1.1rem; }
+
+        .fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .9rem 1rem;
+        }
+
+        label { display: grid; gap: .35rem; font-size: .88rem; font-weight: 650; }
+        label.wide { grid-column: 1 / -1; }
+
+        input, textarea {
+            width: 100%;
+            min-height: 2.65rem;
+            padding: .65rem .75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: .55rem;
+            background: #fff;
+            color: #0f172a;
+            font: inherit;
+            font-size: .95rem;
+        }
+
+        textarea { min-height: 5rem; resize: vertical; }
+        input:focus, textarea:focus { outline: 2px solid #818cf8; border-color: #4f46e5; }
+        input[type="color"] { padding: .25rem; cursor: pointer; }
+        .hint { color: #64748b; font-size: .78rem; font-weight: 400; }
+
+        .preview {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: center;
+            gap: .8rem;
+            margin-top: 1rem;
+            padding: .9rem;
+            border: 1px solid #e2e8f0;
+            border-radius: .75rem;
+            background: #f8fafc;
+        }
+
+        .preview-icon {
+            display: grid;
+            width: 2.8rem;
+            height: 2.8rem;
+            place-items: center;
+            border-radius: .7rem;
+            font-size: .7rem;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+            text-align: center;
+        }
+
+        .preview strong, .preview span { display: block; }
+        .preview strong { margin-bottom: .2rem; }
+        .preview span { color: #64748b; font-size: .85rem; }
+
+        .empty {
+            padding: 2rem;
+            border: 1px dashed #94a3b8;
+            border-radius: 1rem;
+            color: #64748b;
+            text-align: center;
+        }
+
+        @media (max-width: 650px) {
+            .toolbar { align-items: flex-start; flex-direction: column; }
+            .fields { grid-template-columns: 1fr; }
+            label.wide { grid-column: auto; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Editor rozcestníku</h1>
+            <p>Spusťte <code>node editor_server.js</code> ve složce rozcestníku. Upravte položky a změny zapište do <code>index.html</code> tlačítkem Uložit.</p>
+        </div>
+    </header>
+    <main class="container">
+        <div class="toolbar">
+            <div id="status" role="status" aria-live="polite">Načítám položky…</div>
+            <div class="actions">
+                <button id="add-entry" class="secondary" type="button" disabled>Přidat položku</button>
+                <button id="save" type="button" disabled>Uložit změny</button>
+            </div>
+        </div>
+        <div id="entries"></div>
+    </main>
+    <datalist id="categories"></datalist>
+
+    <script>
+        const fields = [
+            { key: 'nazev', label: 'Název', type: 'text', required: true },
+            { key: 'odkaz', label: 'Odkaz', type: 'url', required: true, hint: 'Adresa webu nebo relativní cesta, například dalsi-aplikace.html.' },
+            { key: 'popis', label: 'Popis', type: 'textarea', required: true, wide: true },
+            { key: 'kategorie', label: 'Kategorie', type: 'text', required: true, list: 'categories' },
+            { key: 'ikona', label: 'Ikona Lucide', type: 'text', required: true, hint: 'Název ikony z lucide.dev/icons.' },
+            { key: 'barvaPozadiIkony', label: 'Pozadí ikony', type: 'color', required: true },
+            { key: 'barvaIkony', label: 'Barva ikony', type: 'color', required: true }
+        ];
+        const legacyColors = {
+            'bg-gray-200': '#e5e7eb',
+            'text-gray-700': '#374151'
+        };
+        const entriesElement = document.getElementById('entries');
+        const statusElement = document.getElementById('status');
+        const saveButton = document.getElementById('save');
+        const addButton = document.getElementById('add-entry');
+        let entries = [];
+        let dirty = false;
+        let saving = false;
+        let revision = 0;
+
+        function colorFromClass(value, prefix) {
+            const match = new RegExp('^' + prefix + '-\\[#([0-9a-fA-F]{6})\\]$').exec(value);
+            if (match) return '#' + match[1];
+            return legacyColors[value] || (prefix === 'bg' ? '#f8fafc' : '#2563eb');
+        }
+
+        function setStatus(message, kind) {
+            statusElement.textContent = message;
+            statusElement.className = kind || '';
+        }
+
+        function setDirty() {
+            dirty = true;
+            revision += 1;
+            setStatus('Neuložené změny', '');
+            saveButton.disabled = saving;
+        }
+
+        function makeLabel(field, entry, preview) {
+            const label = document.createElement('label');
+            label.textContent = field.label;
+            if (field.wide) label.classList.add('wide');
+
+            const input = document.createElement(field.type === 'textarea' ? 'textarea' : 'input');
+            if (field.type !== 'textarea') input.type = field.type;
+            if (field.required) input.required = true;
+            if (field.list) input.setAttribute('list', field.list);
+
+            if (field.type === 'color') {
+                const prefix = field.key === 'barvaPozadiIkony' ? 'bg' : 'text';
+                input.value = colorFromClass(entry[field.key], prefix);
+            } else {
+                input.value = entry[field.key] || '';
+                if (field.key === 'nazev') input.autocomplete = 'off';
+            }
+
+            input.addEventListener('input', () => {
+                const value = field.type === 'color'
+                    ? `${field.key === 'barvaPozadiIkony' ? 'bg' : 'text'}-[#${input.value.slice(1)}]`
+                    : input.value;
+                entry[field.key] = value;
+                if (field.key === 'nazev') {
+                    preview.heading.textContent = value || 'Název aplikace';
+                    preview.title.textContent = value || 'Název aplikace';
+                }
+                if (field.key === 'popis') preview.description.textContent = value || 'Popis aplikace';
+                if (field.key === 'barvaPozadiIkony') preview.icon.style.backgroundColor = input.value;
+                if (field.key === 'barvaIkony') preview.icon.style.color = input.value;
+                if (field.key === 'ikona') preview.icon.textContent = value || 'ikona';
+                setDirty();
+            });
+
+            label.appendChild(input);
+            if (field.hint) {
+                const hint = document.createElement('span');
+                hint.className = 'hint';
+                hint.textContent = field.hint;
+                label.appendChild(hint);
+            }
+            return label;
+        }
+
+        function renderEntries() {
+            entriesElement.replaceChildren();
+            const categories = [...new Set(entries.map(entry => entry.kategorie).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'cs'));
+            document.getElementById('categories').replaceChildren(...categories.map(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                return option;
+            }));
+
+            if (!entries.length) {
+                const empty = document.createElement('div');
+                empty.className = 'empty';
+                empty.textContent = 'Zatím tu nejsou žádné položky. Přidejte první pomocí tlačítka výše.';
+                entriesElement.appendChild(empty);
+            }
+
+            entries.forEach((entry, index) => {
+                const section = document.createElement('section');
+                section.className = 'entry';
+
+                const heading = document.createElement('div');
+                heading.className = 'entry-header';
+                const title = document.createElement('h2');
+                title.textContent = entry.nazev || `Nová položka ${index + 1}`;
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'danger';
+                remove.textContent = 'Odebrat';
+                remove.setAttribute('aria-label', `Odebrat položku ${entry.nazev || index + 1}`);
+                remove.addEventListener('click', () => {
+                    if (!confirm(`Odebrat položku „${entry.nazev || 'bez názvu'}“?`)) return;
+                    entries.splice(index, 1);
+                    renderEntries();
+                    setDirty();
+                });
+                heading.append(title, remove);
+
+                const grid = document.createElement('div');
+                grid.className = 'fields';
+                const preview = {
+                    heading: title,
+                    title: document.createElement('strong'),
+                    description: document.createElement('span'),
+                    icon: document.createElement('div')
+                };
+
+                fields.forEach(field => grid.appendChild(makeLabel(field, entry, preview)));
+
+                const previewCard = document.createElement('div');
+                previewCard.className = 'preview';
+                preview.icon.className = 'preview-icon';
+                preview.icon.style.backgroundColor = colorFromClass(entry.barvaPozadiIkony, 'bg');
+                preview.icon.style.color = colorFromClass(entry.barvaIkony, 'text');
+                preview.icon.textContent = entry.ikona || 'ikona';
+                const previewText = document.createElement('div');
+                preview.title.textContent = entry.nazev || `Nová položka ${index + 1}`;
+                preview.description.textContent = entry.popis || 'Popis aplikace';
+                previewText.append(preview.title, preview.description);
+                previewCard.append(preview.icon, previewText);
+                section.append(heading, grid, previewCard);
+                entriesElement.appendChild(section);
+            });
+        }
+
+        async function loadEntries() {
+            try {
+                const response = await fetch('/api/apps', { cache: 'no-store' });
+                const payload = await response.json();
+                if (!response.ok) throw new Error(payload.error || 'Načtení položek se nezdařilo.');
+                entries = payload.apps;
+                dirty = false;
+                renderEntries();
+                addButton.disabled = false;
+                saveButton.disabled = true;
+                setStatus(`Načteno ${entries.length} položek z index.html.`, 'success');
+            } catch (error) {
+                setStatus(`Chyba při načítání: ${error.message}`, 'error');
+            }
+        }
+
+        addButton.addEventListener('click', () => {
+            entries.push({
+                nazev: '',
+                popis: '',
+                odkaz: '',
+                ikona: 'star',
+                barvaPozadiIkony: 'bg-[#f8fafc]',
+                barvaIkony: 'text-[#2563eb]',
+                kategorie: 'Ostatní'
+            });
+            renderEntries();
+            setDirty();
+            entriesElement.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        saveButton.addEventListener('click', async () => {
+            if (saving || !dirty) return;
+            saving = true;
+            saveButton.disabled = true;
+            const savedRevision = revision;
+            setStatus('Ukládám změny do index.html…', '');
+            try {
+                const response = await fetch('/api/apps', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apps: entries })
+                });
+                const payload = await response.json();
+                if (!response.ok) throw new Error(payload.error || 'Uložení se nezdařilo.');
+                dirty = revision !== savedRevision;
+                setStatus(
+                    dirty ? 'Uložena předchozí verze; máte další neuložené změny.' : 'Změny byly uloženy do index.html.',
+                    dirty ? '' : 'success'
+                );
+            } catch (error) {
+                setStatus(`Chyba při ukládání: ${error.message}`, 'error');
+            } finally {
+                saving = false;
+                saveButton.disabled = !dirty;
+            }
+        });
+
+        window.addEventListener('beforeunload', event => {
+            if (!dirty) return;
+            event.preventDefault();
+            event.returnValue = '';
+        });
+
+        loadEntries();
+    </script>
+</body>
+</html>
