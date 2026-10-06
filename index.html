@@ -52,80 +52,70 @@
         <p>&copy; <span id="rok"></span> - DanteCZE</p>
     </footer>
 
-    <!-- LOGIKA APLIKACE A DATA -->
+    <!-- EDITOR_DATA_START -->
+    <script type="application/json" id="directory-data">
+[
+    {
+        "nazev": "Moje Eurona",
+        "popis": "Správce zásob a objednávek z Eurony.",
+        "odkaz": "https://mojeeurona.web.app/",
+        "ikona": "sparkles",
+        "barvaPozadiIkony": "bg-[#f8fafc]",
+        "barvaIkony": "text-[#a855f7]",
+        "kategorie": "Správa domácnosti"
+    },
+    {
+        "nazev": "Můj Mrazák",
+        "popis": "Správce zásob v mrazácích.",
+        "odkaz": "https://mujmrazak.web.app/",
+        "ikona": "snowflake",
+        "barvaPozadiIkony": "bg-[#f8fafc]",
+        "barvaIkony": "text-[#2563eb]",
+        "kategorie": "Správa domácnosti"
+    },
+    {
+        "nazev": "MyBau",
+        "popis": "Nákupní seznam pro Bauhaus.",
+        "odkaz": "https://mybau.netlify.app/",
+        "ikona": "shopping-cart",
+        "barvaPozadiIkony": "bg-[#E3000F]",
+        "barvaIkony": "text-[#F4F4F4]",
+        "kategorie": "Nákupy"
+    },
+    {
+        "nazev": "AOI Rework",
+        "popis": "Pomocník k reworkování.",
+        "odkaz": "https://aoirework.web.app/",
+        "ikona": "cpu",
+        "barvaPozadiIkony": "bg-[#f8fafc]",
+        "barvaIkony": "text-[#2563eb]",
+        "kategorie": "Nástroje"
+    },
+    {
+        "nazev": "Iniciativa",
+        "popis": "Soubojová iniciativa.",
+        "odkaz": "https://iniciativa.web.app",
+        "ikona": "star",
+        "barvaPozadiIkony": "bg-gray-200",
+        "barvaIkony": "text-gray-700",
+        "kategorie": "Dungeons & Dragons"
+    },
+    {
+        "nazev": "Kovárna",
+        "popis": "Tvorba NPC a Followerů v pravidlech 1kF.",
+        "odkaz": "https://kovarna.netlify.app",
+        "ikona": "anvil",
+        "barvaPozadiIkony": "bg-[#f3f4f6]",
+        "barvaIkony": "text-[#991b1b]",
+        "kategorie": "Dungeons & Dragons"
+    }
+]
+    </script>
+    <!-- EDITOR_DATA_END -->
+
+    <!-- LOGIKA APLIKACE -->
     <script>
-        // ==========================================
-        // 1. ZDE PŘIDÁVEJ SVÉ APLIKACE
-        // ==========================================
-        // Pro přidání nové aplikace stačí zkopírovat jeden blok v závorkách {...}
-        // Seznam všech dostupných ikon najdeš na: https://lucide.dev/icons
-        
-        const seznamAplikaci = [
-            {
-                nazev: "Moje Eurona",
-                popis: "Správce zásob a objednávek z Eurony.",
-                odkaz: "https://mojeeurona.web.app/", // Sem dej URL nebo název souboru
-                ikona: "sparkles",      // Název ikony z webu Lucide
-                barvaPozadiIkony: "bg-[#f8fafc]",
-                barvaIkony: "text-[#a855f7]",
-                kategorie: "Správa domácnosti" // <-- NOVÁ VLASTNOST
-            },
-            {
-                nazev: "Můj Mrazák",
-                popis: "Správce zásob v mrazácích.",
-                odkaz: "https://mujmrazak.web.app/",
-                ikona: "snowflake",
-                barvaPozadiIkony: "bg-[#f8fafc]",
-                barvaIkony: "text-[#2563eb]",
-                kategorie: "Správa domácnosti"
-            },
-            {
-                nazev: "MyBau",
-                popis: "Nákupní seznam pro Bauhaus.",
-                odkaz: "https://mybau.netlify.app/",
-                ikona: "shopping-cart",
-                barvaPozadiIkony: "bg-[#E3000F]",
-                barvaIkony: "text-[#F4F4F4]",
-                kategorie: "Nákupy"
-            },
-			{
-                nazev: "AOI Rework",
-                popis: "Pomocník k reworkování.",
-                odkaz: "https://aoirework.web.app/",
-                ikona: "cpu", // hledej na lucide.dev
-                barvaPozadiIkony: "bg-[#f8fafc]",
-                barvaIkony: "text-[#2563eb]",
-                kategorie: "Nástroje"
-            },
-			{
-                nazev: "Iniciativa",
-                popis: "Soubojová iniciativa.",
-                odkaz: "https://iniciativa.web.app",
-                ikona: "star", // hledej na lucide.dev
-                barvaPozadiIkony: "bg-gray-200",
-                barvaIkony: "text-gray-700",
-                kategorie: "Dungeons & Dragons"
-            },
-			{
-                nazev: "Kovárna",
-                popis: "Tvorba NPC a Followerů v pravidlech 1kF.",
-                odkaz: "https://kovarna.netlify.app",
-                ikona: "anvil", // hledej na lucide.dev
-                barvaPozadiIkony: "bg-[#f3f4f6]",
-                barvaIkony: "text-[#991b1b]",
-                kategorie: "Dungeons & Dragons"
-            }
-            // PŘIKLAD DALŠÍ APLIKACE (smaž lomítka a uprav):
-            // ,{
-            //     nazev: "Moje nová aplikace",
-            //     popis: "Krátký popis toho, co aplikace umí.",
-            //     odkaz: "https://nova-aplikace.cz",
-            //     ikona: "star", // hledej na lucide.dev
-            //     barvaPozadiIkony: "bg-gray-200",
-            //     barvaIkony: "text-gray-700",
-            //     kategorie: "Ostatní nástroje"
-            // }
-        ];
+        const seznamAplikaci = JSON.parse(document.getElementById('directory-data').textContent);
 
         // ==========================================
         // 2. VYKRESLENÍ (Do tohoto kódu už nemusíš zasahovat)
@@ -149,6 +139,13 @@
         // 3. Řazení samotných kategorií podle abecedy
         const serazeneKategorie = Object.keys(aplikacePodleKategorii).sort((a, b) => a.localeCompare(b, 'cs'));
 
+        const vytvorIkonu = (nazev, tridy) => {
+            const ikona = document.createElement('i');
+            ikona.setAttribute('data-lucide', nazev);
+            ikona.className = tridy;
+            return ikona;
+        };
+
         // 4. Vykreslení kategorií a jejich aplikací
         serazeneKategorie.forEach(kategorie => {
             // Vytvoření sekce pro celou kategorii
@@ -157,7 +154,7 @@
             // Nadpis kategorie
             const nadpis = document.createElement('h2');
             nadpis.className = "text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-200 pb-2";
-            nadpis.innerHTML = `<i data-lucide="folder" class="w-6 h-6 text-primary"></i> ${kategorie}`;
+            nadpis.append(vytvorIkonu('folder', 'w-6 h-6 text-primary'), document.createTextNode(kategorie));
             sekceKategorie.appendChild(nadpis);
 
             // Mřížka pro aplikace v dané kategorii
@@ -169,6 +166,7 @@
                 const karta = document.createElement('a');
                 karta.href = app.odkaz;
                 karta.target = "_blank"; // Otevře se na nové záložce
+                karta.rel = "noopener noreferrer";
                 
                 karta.className = `
                     group bg-white rounded-2xl p-6 shadow-sm border border-slate-200
@@ -177,29 +175,36 @@
                     focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
                 `;
 
-                // Vyčištění odkazu pro zobrazení (odstraní https:// a případné lomítko na konci)
-                const zobrazenyOdkaz = app.odkaz.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                const hlavickaKarty = document.createElement('div');
+                hlavickaKarty.className = 'flex items-start justify-between mb-4';
 
-                karta.innerHTML = `
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="p-3 rounded-xl ${app.barvaPozadiIkony} ${app.barvaIkony} group-hover:scale-110 transition-transform duration-300 border border-slate-100">
-                            <i data-lucide="${app.ikona}" class="w-6 h-6"></i>
-                        </div>
-                        <div class="text-slate-300 group-hover:text-primary transition-colors duration-300">
-                            <i data-lucide="external-link" class="w-5 h-5"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-primary transition-colors duration-300">
-                        ${app.nazev}
-                    </h3>
-                    <p class="text-slate-600 text-sm leading-relaxed flex-grow">
-                        ${app.popis}
-                    </p>
-                    <div class="mt-5 pt-4 border-t border-slate-100 flex items-center text-slate-400 text-sm truncate group-hover:text-primary/80 transition-colors duration-300">
-                        <i data-lucide="link-2" class="w-4 h-4 mr-2 flex-shrink-0"></i>
-                        <span class="truncate">${zobrazenyOdkaz}</span>
-                    </div>
-                `;
+                const obalIkony = document.createElement('div');
+                obalIkony.className = `p-3 rounded-xl ${app.barvaPozadiIkony} ${app.barvaIkony} group-hover:scale-110 transition-transform duration-300 border border-slate-100`;
+                obalIkony.appendChild(vytvorIkonu(app.ikona, 'w-6 h-6'));
+
+                const odkazIkona = document.createElement('div');
+                odkazIkona.className = 'text-slate-300 group-hover:text-primary transition-colors duration-300';
+                odkazIkona.appendChild(vytvorIkonu('external-link', 'w-5 h-5'));
+                hlavickaKarty.append(obalIkony, odkazIkona);
+
+                const nadpisKarty = document.createElement('h3');
+                nadpisKarty.className = 'text-xl font-bold text-slate-800 mb-2 group-hover:text-primary transition-colors duration-300';
+                nadpisKarty.textContent = app.nazev;
+
+                const popisKarty = document.createElement('p');
+                popisKarty.className = 'text-slate-600 text-sm leading-relaxed flex-grow';
+                popisKarty.textContent = app.popis;
+
+                const patickaKarty = document.createElement('div');
+                patickaKarty.className = 'mt-5 pt-4 border-t border-slate-100 flex items-center text-slate-400 text-sm truncate group-hover:text-primary/80 transition-colors duration-300';
+                patickaKarty.appendChild(vytvorIkonu('link-2', 'w-4 h-4 mr-2 flex-shrink-0'));
+
+                const textOdkazu = document.createElement('span');
+                textOdkazu.className = 'truncate';
+                textOdkazu.textContent = app.odkaz.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                patickaKarty.appendChild(textOdkazu);
+
+                karta.append(hlavickaKarty, nadpisKarty, popisKarty, patickaKarty);
 
                 mrizka.appendChild(karta);
             });
